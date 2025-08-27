@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLA University - Academic Timetable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) translateY(-50%) rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .university-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .institute-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.3rem;
+        }
+
+        .session-info {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .session-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .detail-item {
+            background: rgba(255,255,255,0.1);
+            padding: 0.8rem;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        .timetable-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+            border-radius: 2px;
+        }
+
+        .timetable {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        th:first-child {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        td {
+            padding: 0.8rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover td {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .day-cell {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .time-slot {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            margin-top: 0.2rem;
+        }
+
+        .subject-code {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .venue {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .subjects-table {
+            margin-top: 2rem;
+        }
+
+        .subjects-table th {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .subjects-table .code-cell {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .highlight-row {
+            background: rgba(241, 196, 15, 0.1);
+        }
+
+        .credit-cell, .ltp-cell {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+
+        .faculty-list {
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .university-title {
+                font-size: 1.8rem;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1 class="university-title">GLA UNIVERSITY, MATHURA</h1>
+                <p class="institute-info">Institute of Engineering & Technology</p>
+                <p class="institute-info">Computer Engineering & Applications</p>
+                <p class="institute-info">Course: Bachelor of Technology</p>
+                
+                <div class="session-info">
+                    <div class="session-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Programme</div>
+                            <div>Odd Semester</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Section</div>
+                            <div>2FD</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Semester</div>
+                            <div>III</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Session</div>
+                            <div>2025-2026</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Class Advisor</div>
+                            <div>Dr. Neetu Agrawal(EC)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">W.E.F</div>
+                            <div>04/Aug/2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="timetable-section">
+                <h2 class="section-title">Weekly Timetable</h2>
+                <div class="timetable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>08:00-09:00</th>
+                                <th>09:00-10:00</th>
+                                <th>10:00-11:00</th>
+                                <th>11:00-12:00</th>
+                                <th>12:00-01:00</th>
+                                <th>01:00-02:00</th>
+                                <th>02:00-03:00</th>
+                                <th>03:00-04:00</th>
+                                <th>04:00-05:00</th>
+                                <th>05:00-06:00</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="day-cell">Monday</td>
+                                <td>
+                                    <div class="subject-code">BCSC1003</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <div class="subject-code">PCPH0001</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1003</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BELH3003</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1005</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell">Tuesday</td>
+                                <td>
+                                    <div class="subject-code">BCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">PCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1005</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1005</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1005</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell">Wednesday</td>
+                                <td>
+                                    <div class="subject-code">BCSC1010</div>
+                                    <div class="venue">ABVII-410</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD5/BCSC1101</div>
+                                    <div class="venue">ABVII-410</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD1/BCSC1802/AB1-204</div>
+                                    <div class="subject-code">2FD3/BCSC802/AB1-205</div>
+                                    <div class="subject-code">2FD5/BCSC802/AB1-206</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1003</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD1/BCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD3/BELH3003</div>
+                                    <div class="venue">ABVII-411</div>
+                                    <div class="subject-code">2FD5/BCSE0031</div>
+                                    <div class="venue">ABVII-410</div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell">Thursday</td>
+                                <td>
+                                    <div class="subject-code">2FD1/BCSC0804/AB1-6002</div>
+                                    <div class="subject-code">2FD3/BCSC0804/AB1-5004</div>
+                                    <div class="subject-code">2FD5/BCSC0804/AB1-5005</div>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <div class="subject-code">BCSE0031</div>
+                                    <div class="venue">ABVII-410</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSE0031</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC1005</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD5/BCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                    <div class="subject-code">2FD1/BELH3003</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell">Friday</td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <div class="subject-code">BCSC1010</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSE0031</div>
+                                    <div class="venue">ABVII-411</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">BCSC0801</div>
+                                    <div class="venue">ABVII-404</div>
+                                </td>
+                                <td>
+                                    <div class="subject-code">2FD1/BELH3003</div>
+                                    <div class="venue">ABVII-411</div>
+                                    <div class="subject-code">2FD3/BELH3003</div>
+                                    <div class="venue">ABVII-402</div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell">Saturday</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="timetable-section">
+                <h2 class="section-title">Subject Details</h2>
+                <div class="timetable subjects-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Subject Name</th>
+                                <th>Credit</th>
+                                <th>L T P</th>
+                                <th>Faculty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="code-cell">BCSC1005</td>
+                                <td>Computer Organization</td>
+                                <td class="credit-cell">3</td>
+                                <td class="ltp-cell">3 0 0</td>
+                                <td>Dr. Neetu Agrawal(EC)</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSC0804</td>
+                                <td>Computer Organization Lab</td>
+                                <td class="credit-cell">1</td>
+                                <td class="ltp-cell">0 0 2</td>
+                                <td>2FD1: Dr. Neetu Agrawal(EC), 2FD2: Dr. Arnab Panda(EC), 2FD3: Dr. Dhirendra Kumar(EC)</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">ONLC0020</td>
+                                <td>Software Engineering(Online)</td>
+                                <td class="credit-cell">3</td>
+                                <td class="ltp-cell">3 0 0</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSC1010</td>
+                                <td>Discrete Mathematics</td>
+                                <td class="credit-cell">4</td>
+                                <td class="ltp-cell">3 1 0</td>
+                                <td>Dr. Praveen Mittal, 2FD1+2FD2+2FD3: Dr. Praveen Mittal</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSC1003</td>
+                                <td>Database Management Systems</td>
+                                <td class="credit-cell">3</td>
+                                <td class="ltp-cell">3 0 0</td>
+                                <td>Mr. Joy Gorai</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSC0802</td>
+                                <td>Database Management Systems Lab</td>
+                                <td class="credit-cell">1</td>
+                                <td class="ltp-cell">0 0 2</td>
+                                <td>2FD1: Mr. Joy Gorai, 2FD2: Mr. Amit Kumar, 2FD3: Ms. Megha Kist</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSC1002</td>
+                                <td>Object Oriented Programming</td>
+                                <td class="credit-cell">3</td>
+                                <td class="ltp-cell">3 0 0</td>
+                                <td>INTEGRAMIND</td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td class="code-cell">BCSC0801</td>
+                                <td>Object Oriented Programming Lab(BYOD)</td>
+                                <td class="credit-cell">1</td>
+                                <td class="ltp-cell">0 0 2</td>
+                                <td>INTEGRAMIND</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BELH3003</td>
+                                <td>English for Professional Purpose - I(Core)</td>
+                                <td class="credit-cell">2</td>
+                                <td class="ltp-cell">2 2 0</td>
+                                <td>Dr. Praveen Singh, 2FD1 Dr. Praveen Singh</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">PCPH0001</td>
+                                <td>General Physics(Online)</td>
+                                <td class="credit-cell">1</td>
+                                <td class="ltp-cell">0 0 2</td>
+                                <td>INTEGRAMIND</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BELH0017</td>
+                                <td>Ethics & Values(Online)</td>
+                                <td class="credit-cell">2</td>
+                                <td class="ltp-cell">2 0 0</td>
+                                <td>Ms. Manisha Rao (GAL125851)</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSE0031</td>
+                                <td>Introduction to Frontend Engineering</td>
+                                <td class="credit-cell">3</td>
+                                <td class="ltp-cell">3 0 0</td>
+                                <td>FITTrainer_1</td>
+                            </tr>
+                            <tr>
+                                <td class="code-cell">BCSE0031</td>
+                                <td>Introduction to Frontend Engineering Lab</td>
+                                <td class="credit-cell">1</td>
+                                <td class="ltp-cell">0 0 2</td>
+                                <td>FITTrainer_1</td>
+                            </tr>
+                            <tr style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%); font-weight: bold;">
+                                <td colspan="2">Total</td>
+                                <td class="credit-cell">28</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Time Table In-charge</h4>
+                    <div class="faculty-list">
+                        <p>Mr. Raushan Kumar Singh</p>
+                        <p>Mr. Rahul Kumar</p>
+                        <p>Time Table In-charge, CEA Dept.</p>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Department Head</h4>
+                    <div class="faculty-list">
+                        <p>Dr. Jupinder Pal Singh</p>
+                        <p>HOD, CEA (Hons.), CEA</p>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Associate Head</h4>
+                    <div class="faculty-list">
+                        <p>Dr. Sandeep Rathore</p>
+                        <p>Associate Head, CEA Dept</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 GLA University, Mathura. All rights reserved.</p>
+                <p>Academic Session 2025-2026 | Computer Engineering & Applications</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
+<!-- http://127.0.0.1:5500/Experiments/Timetable.html -->
